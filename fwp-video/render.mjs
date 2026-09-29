@@ -1,5 +1,5 @@
 // Exporta index.html a MP4 (1280x720, 30 fps) con los efectos de sonido.
-// Uso: FFMPEG=/ruta/ffmpeg node render.mjs [salida.mp4] [fonts.css opcional con @font-face inline]
+// Uso: [PAGE=juego1.html] FFMPEG=/ruta/ffmpeg node render.mjs [salida.mp4] [fonts.css opcional con @font-face inline]
 // Requiere playwright (con Chromium) y ffmpeg.
 import { chromium } from 'playwright';
 import { spawn } from 'child_process';
@@ -14,7 +14,7 @@ const FFMPEG = process.env.FFMPEG || 'ffmpeg';
 const FPS = 30, SR = 44100;
 fs.mkdirSync(path.dirname(out), { recursive: true });
 
-let html = fs.readFileSync(path.join(dir, 'index.html'), 'utf8');
+let html = fs.readFileSync(path.join(dir, process.env.PAGE || 'index.html'), 'utf8');
 if (fontsCss) html = html.replace(/<link rel="stylesheet"[^>]*>/, `<style>${fontsCss}</style>`);
 
 const browser = await chromium.launch();
@@ -56,6 +56,10 @@ const SFX = {
   coin: t => { tone(t, 988, .08, 'square', .08); tone(t, 1319, .25, 'square', .08, .08) },
   whistle: t => { tone(t, 2600, .6, 'sine', .18, 0, 2500); tone(t, 2650, .6, 'triangle', .08) },
   tick: t => tone(t, 1500, .05, 'square', .05),
+  ding2: t => tone(t, 1568, .5, 'sine', .08),
+  hit: t => { tone(t, 90, .35, 'sine', .5, 0, 40); noise(t, .12, .25, 2500) },
+  trap: t => { tone(t, 300, .6, 'sawtooth', .12, 0, 50); noise(t, .3, .2, 400) },
+  riser: t => { tone(t, 200, .7, 'sawtooth', .07, 0, 1200); noise(t, .7, .12, 3000) },
   tada: t => { [523, 659, 784, 1047].forEach((f, i) => tone(t, f, .5, 'triangle', .14, i * .09)); noise(t, .6, .12, 2500) },
 };
 events.forEach(e => SFX[e.type] && SFX[e.type](e.t));
